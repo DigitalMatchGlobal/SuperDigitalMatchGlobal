@@ -1,10 +1,27 @@
-import { supabase } from './customSupabaseClient';
+import { createClient } from '@supabase/supabase-js'
 
-export { supabase };
+// =======================
+// Supabase client (único)
+// =======================
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG || 'vicky';
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    '[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check .env / Vercel env vars.'
+  )
+}
 
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// =======================
+// Multitenant
+// =======================
+export const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG || 'digitalmatch'
+
+// =======================
 // Catalog API
+// =======================
 export const catalogApi = {
   async getItems(tenantId) {
     const { data, error } = await supabase
@@ -18,10 +35,10 @@ export const catalogApi = {
       `)
       .eq('tenant_id', tenantId)
       .eq('status', 'active')
-      .order('display_order', { ascending: true });
+      .order('display_order', { ascending: true })
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async getItemById(id) {
@@ -35,10 +52,10 @@ export const catalogApi = {
         )
       `)
       .eq('id', id)
-      .single();
+      .single()
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async createItem(item) {
@@ -46,10 +63,10 @@ export const catalogApi = {
       .from('catalog_items')
       .insert(item)
       .select()
-      .single();
+      .single()
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async updateItem(id, updates) {
@@ -58,23 +75,25 @@ export const catalogApi = {
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .single()
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async deleteItem(id) {
     const { error } = await supabase
       .from('catalog_items')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
 
-    if (error) throw error;
-  }
-};
+    if (error) throw error
+  },
+}
 
+// =======================
 // Bookings API
+// =======================
 export const bookingsApi = {
   async getAll(tenantId) {
     const { data, error } = await supabase
@@ -85,10 +104,10 @@ export const bookingsApi = {
         people(name, email)
       `)
       .eq('tenant_id', tenantId)
-      .order('booking_date', { ascending: false });
+      .order('booking_date', { ascending: false })
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async create(booking) {
@@ -101,11 +120,11 @@ export const bookingsApi = {
       booking_date_param: booking.booking_date,
       start_time_param: booking.start_time,
       end_time_param: booking.end_time,
-      notes_param: booking.notes || null
-    });
+      notes_param: booking.notes || null,
+    })
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async updateStatus(id, status) {
@@ -114,24 +133,26 @@ export const bookingsApi = {
       .update({ status })
       .eq('id', id)
       .select()
-      .single();
+      .single()
 
-    if (error) throw error;
-    return data;
-  }
-};
+    if (error) throw error
+    return data
+  },
+}
 
+// =======================
 // Leads API
+// =======================
 export const leadsApi = {
   async getAll(tenantId) {
     const { data, error } = await supabase
       .from('leads')
       .select('*')
       .eq('tenant_id', tenantId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async create(lead) {
@@ -141,11 +162,11 @@ export const leadsApi = {
       email_param: lead.email,
       phone_param: lead.phone || null,
       message_param: lead.message || null,
-      source_param: lead.source || 'web'
-    });
+      source_param: lead.source || 'web',
+    })
 
-    if (error) throw error;
-    return data;
+    if (error) throw error
+    return data
   },
 
   async updateStatus(id, status) {
@@ -154,14 +175,16 @@ export const leadsApi = {
       .update({ status })
       .eq('id', id)
       .select()
-      .single();
+      .single()
 
-    if (error) throw error;
-    return data;
-  }
-};
+    if (error) throw error
+    return data
+  },
+}
 
+// =======================
 // Tenants API
+// =======================
 export const tenantsApi = {
   async getBySlug(slug) {
     const { data, error } = await supabase
@@ -173,14 +196,16 @@ export const tenantsApi = {
       `)
       .eq('slug', slug)
       .eq('is_active', true)
-      .single();
+      .single()
 
-    if (error) throw error;
-    return data;
-  }
-};
+    if (error) throw error
+    return data
+  },
+}
 
+// =======================
 // Categories API
+// =======================
 export const categoriesApi = {
   async getAll(tenantId) {
     const { data, error } = await supabase
@@ -188,9 +213,9 @@ export const categoriesApi = {
       .select('*')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
-      .order('display_order', { ascending: true });
+      .order('display_order', { ascending: true })
 
-    if (error) throw error;
-    return data;
-  }
-};
+    if (error) throw error
+    return data
+  },
+}
